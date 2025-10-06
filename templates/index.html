@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trio Airbnb - Vacation Rentals</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+{% include 'includes/flash_messages.html' %}
+
+
+
+    <div id="homepage">
+ <header>
+    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+    <nav>
+        {% if session.user_id %}
+        <span class="user-welcome">Welcome, {{ session.user_name }}</span>
+        <a href="{{ url_for('profile') }}" class="btn" style="margin-right: 10px;">My Profile</a>
+        <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        {% else %}
+        <div class="nav-auth">
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+            <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
+        </div>
+        {% endif %}
+    </nav>
+</header>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Home Away from Home</h1>
+                <p>Discover unique places to stay around the world</p>
+
+                <form class="search-bar" method="POST" action="{{ url_for('search_properties') }}">
+                    <div class="search-input">
+                        <label>Search Destinations</label>
+                        <input type="text" name="location" placeholder="Where are you going?" value="{{ search_location if search_location }}">
+                    </div>
+                    <div class="search-input">
+                        <label>Check-in</label>
+                        <input type="date" name="check_in">
+                    </div>
+                    <div class="search-input">
+                        <label>Check-out</label>
+                        <input type="date" name="check_out">
+                    </div>
+                    <div class="search-input">
+                        <label>Guests</label>
+                        <select name="guests">
+                            <option value="1">1 Guest</option>
+                            <option value="2">2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4+ Guests</option>
+                        </select>
+                    </div>
+                    <div class="search-btn">
+                        <button type="submit" class="btn">Search</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="listings">
+            <div class="container">
+                <h2 class="section-title">Explore Properties</h2>
+                <div class="properties-grid">
+                    {% for property in properties %}
+                    <div class="property-card">
+                        <img src="{{ property.image_url }}" alt="{{ property.title }}" class="property-img">
+                        <div class="property-details">
+                            <div class="property-type">{{ property.property_type }}</div>
+                            <h3 class="property-name">{{ property.title }}</h3>
+                            <p class="property-description">{{ property.description }}</p>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i> {{ property.location }}
+                            </div>
+                            <div class="property-price">${{ property.price }} / night</div>
+
+                            {% if session.user_id %}
+                            <form class="booking-form" method="POST" action="{{ url_for('book_property') }}" style="margin-top: 15px;">
+    <input type="hidden" name="property_id" value="{{ property.id }}">
+    <input type="hidden" name="user_id" value="{{ session.get('user_id', '') }}">
+    <input type="hidden" name="guest_name" value="{{ session.get('user_name', '') }}">
+                                <div class="search-input">
+                                    <label>Check-in</label>
+                                    <input type="date" name="check_in" required>
+                                </div>
+                                <div class="search-input">
+                                    <label>Check-out</label>
+                                    <input type="date" name="check_out" required>
+                                </div>
+                                <div class="search-input">
+                                    <label>Guests</label>
+                                    <select name="guests" required>
+                                        <option value="1">1 Guest</option>
+                                        <option value="2">2 Guests</option>
+                                        <option value="3">3 Guests</option>
+                                        <option value="4">4+ Guests</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">Book Now</button>
+                            </form>
+                            {% else %}
+                            <p style="margin-top: 15px; color: #717171; font-style: italic;">
+                                <a href="{{ url_for('login') }}" style="color: #FF5A5F;">Log in</a> to book this property
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                    <div class="copyright">
+                        &copy; 2025 Trio Airbnb. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

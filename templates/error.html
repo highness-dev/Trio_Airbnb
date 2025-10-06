@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Trio Airbnb</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+            background-color: #f7f7f7;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #F44336;
+            margin-bottom: 20px;
+        }
+        .error-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        .error-message {
+            color: #333;
+            margin: 20px 0;
+            padding: 15px;
+            background: #FFF3F3;
+            border-left: 4px solid #F44336;
+            border-radius: 4px;
+            text-align: left;
+        }
+        .error-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .troubleshooting {
+            margin-top: 25px;
+            padding: 15px;
+            background: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            border-radius: 4px;
+            text-align: left;
+        }
+        .troubleshooting h3 {
+            margin-top: 0;
+            color: #E65100;
+        }
+        .troubleshooting ol {
+            padding-left: 20px;
+        }
+        .troubleshooting li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1>Database Connection Error</h1>
+
+            <div class="error-message">
+                <strong>Error Details:</strong><br>
+                {{ error_message }}
+            </div>
+
+            <div class="troubleshooting">
+                <h3><i class="fas fa-wrench"></i> Troubleshooting Steps</h3>
+                <ol>
+                    <li>Make sure PostgreSQL is running on your system</li>
+                    <li>Check if the database 'trio_airbnb' exists</li>
+                    <li>Verify your PostgreSQL username and password</li>
+                    <li>Ensure PostgreSQL is listening on port 5432</li>
+                    <li>Try the <a href="/debug/db">database debug page</a> for more information</li>
+                </ol>
+            </div>
+
+            <div class="error-actions">
+                <a href="{{ url_for('index') }}" class="btn">
+                    <i class="fas fa-refresh"></i> Try Again
+                </a>
+                <a href="/debug/db" class="btn">
+                    <i class="fas fa-bug"></i> Debug Info
+                </a>
+                <a href="/debug/test_connection" class="btn">
+                    <i class="fas fa-plug"></i> Test Connection
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

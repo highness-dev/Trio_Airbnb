@@ -183,6 +183,22 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <div class="admin-section">
+    <h2>Add New Property</h2>
+    <form method="POST" action="{{ url_for('add_property') }}" enctype="multipart/form-data">
+        <div style="display: grid; gap: 15px;">
+            <input type="text" name="title" placeholder="Title" required>
+            <input type="text" name="property_type" placeholder="Type" required>
+            <input type="text" name="location" placeholder="Location" required>
+            <input type="number" name="price" placeholder="Price ($)" required>
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit" style="background:#FF5A5F;color:white;border:none;padding:10px;border-radius:5px;cursor:pointer;">
+                <i class="fas fa-plus"></i> Add Property
+            </button>
+        </div>
+    </form>
+</div>
+
             </div>
 
             <div class="admin-section">

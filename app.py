@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, g
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
@@ -26,16 +27,36 @@ app.config.update(
     SESSION_REFRESH_EACH_REQUEST=True
 )
 
+# -----------------------
+# Upload configuration
+# -----------------------
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 # Database configuration - with fallback to SQLite
+from sqlalchemy import create_engine
+
+# Initialize db *once*
+db = SQLAlchemy()
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
+
+
 try:
     # Try PostgreSQL first
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:highness@localhost:5432/trio_airbnb'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg://postgres:highness@localhost:5432/trio_airbnb'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db = SQLAlchemy(app)
 
-    # Test connection
-    with app.app_context():
-        db.engine.connect()
+    # Test connection before binding db to app
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    engine.connect()
     print("✅ PostgreSQL connection successful")
 
 except Exception as e:
@@ -44,10 +65,12 @@ except Exception as e:
 
     # Fall back to SQLite
     basedir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'trio_airbnb.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'trio_airbnb.db')}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db = SQLAlchemy(app)
     print("✅ SQLite database configured")
+
+# Now finally bind db to app
+db.init_app(app)
 
 
 # User model
@@ -67,20 +90,27 @@ class User(db.Model):
 
 # Property model
 class Property(db.Model):
+    __tablename__ = 'property'
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=False)
     property_type = db.Column(db.String(50), nullable=False)
     location = db.Column(db.String(100), nullable=False)
-    image_url = db.Column(db.String(200), nullable=False)
+    image_url = db.Column(db.String(255), nullable=True)
+    image_filename = db.Column(db.String(255), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationship with bookings
-    bookings = db.relationship('Booking', backref='property', lazy=True)
+    @property
+    def image(self):
+        """Return local filename if exists, else fallback to URL"""
+        if self.image_filename:
+            return self.image_filename
+        return self.image_url
 
     def __repr__(self):
-        return f'<Property {self.title}>'
+        return f"<Property {self.title}>"
 
 
 # Booking model
@@ -213,6 +243,35 @@ init_db()
 
 
 # Routes
+from functools import wraps
+
+
+@app.before_request
+def load_logged_in_user():
+    if 'user_id' in session and session['user_id'] != 'admin':
+        g.user = User.query.get(session['user_id'])
+    elif session.get('user_id') == 'admin':
+        # pseudo-user for admin sessions
+        g.user = None
+    else:
+        g.user = None
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # If you later add role column to User, update logic here.
+        if session.get('user_id') == 'admin':
+            return f(*args, **kwargs)
+        # fallback: if there's a logged in user and has role 'admin' (future)
+        if g.user and getattr(g.user, 'role', None) == 'admin':
+            return f(*args, **kwargs)
+
+        flash("Admin access only", "error")
+        return redirect(url_for('index'))
+    return decorated_function
+
+
 @app.route('/')
 def index():
     try:
@@ -224,7 +283,7 @@ def index():
             print(f"❌ {error_msg}")
             return render_template('error.html', error_message=error_msg)
 
-        properties = Property.query.all()
+        properties = Property.query.order_by(Property.date_created.desc()).all()
         return render_template('index.html', properties=properties)
 
     except Exception as e:
@@ -257,6 +316,18 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
 
+        # Define your admin login details here
+        ADMIN_EMAIL = "admin@trioairbnb.com"
+        ADMIN_PASSWORD = "admin123"  # you can store this hashed later
+
+        # ✅ Check if this is the admin login (hardcoded)
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            session['user_id'] = 'admin'
+            session['user_name'] = 'Admin'
+            flash("Welcome, Admin 👑", "success")
+            return redirect(url_for('admin', password='admin123'))
+
+        # ✅ Normal user login
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             session['user_name'] = user.name
@@ -264,11 +335,11 @@ def login():
 
             flash(f"Welcome back, {user.name}!", "success")
 
-            # Redirect to the originally intended page or home
             next_url = session.pop('next_url', None)
             if next_url:
                 return redirect(next_url)
             return redirect(url_for('index'))
+
         else:
             flash("Invalid email or password", "error")
             return render_template('login.html')
@@ -418,11 +489,74 @@ def admin():
         return "Error loading admin page. Please check database connection."
 
 
+# Route to add a property from admin dashboard
+@app.route('/add_property', methods=['POST'])
+def add_property():
+    # Restrict to admin via session or password query param
+    if session.get('user_id') != 'admin' and request.args.get('password') != 'admin123':
+        flash("Unauthorized: admin only", "error")
+        return redirect(url_for('admin', password='admin123'))
+
+    try:
+        title = request.form.get('title', '').strip()
+        property_type = request.form.get('property_type', '').strip()
+        location = request.form.get('location', '').strip()
+        price_raw = request.form.get('price', '').strip()
+        description = request.form.get('description', '').strip() if request.form.get('description') else ''
+
+        # Basic validation
+        if not title or not property_type or not location or not price_raw:
+            flash("Please provide title, type, location and price.", "error")
+            return redirect(url_for('admin', password='admin123'))
+
+        try:
+            price = float(price_raw)
+        except ValueError:
+            flash("Price must be a number.", "error")
+            return redirect(url_for('admin', password='admin123'))
+
+        image = request.files.get('image')
+        db_image_path = None
+
+        if image and image.filename != '':
+            if allowed_file(image.filename):
+                filename = secure_filename(f"{int(datetime.utcnow().timestamp())}_{image.filename}")
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image.save(save_path)
+                # Store a path relative to static folder for url_for usage
+                db_image_path = f'uploads/{filename}'
+            else:
+                flash("Invalid image type. Allowed: png, jpg, jpeg, gif, webp", "error")
+                return redirect(url_for('admin', password='admin123'))
+
+        # Create and save property
+        new_property = Property(
+            title=title,
+            description=description,
+            property_type=property_type,
+            location=location,
+            price=price,
+            image_url=db_image_path
+        )
+
+        db.session.add(new_property)
+        db.session.commit()
+
+        flash("✅ Property added successfully!", "success")
+        return redirect(url_for('admin', password='admin123'))
+
+    except Exception as e:
+        print(f"Error adding property: {e}")
+        traceback.print_exc()
+        flash("There was an error adding the property. See server logs.", "error")
+        return redirect(url_for('admin', password='admin123'))
+
+
 # Delete user (admin only)
 @app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
     # Basic authentication for admin
-    if request.args.get('password') != 'admin123':
+    if request.args.get('password') != 'admin123' and session.get('user_id') != 'admin':
         return "Unauthorized", 401
 
     try:
@@ -448,7 +582,7 @@ def delete_user(user_id):
 @app.route('/admin/delete_booking/<int:booking_id>', methods=['POST'])
 def delete_booking(booking_id):
     # Basic authentication for admin
-    if request.args.get('password') != 'admin123':
+    if request.args.get('password') != 'admin123' and session.get('user_id') != 'admin':
         return "Unauthorized", 401
 
     try:
@@ -469,20 +603,29 @@ def delete_booking(booking_id):
 @app.route('/admin/delete_property/<int:property_id>', methods=['POST'])
 def delete_property(property_id):
     # Basic authentication for admin
-    if request.args.get('password') != 'admin123':
+    if request.args.get('password') != 'admin123' and session.get('user_id') != 'admin':
         return "Unauthorized", 401
 
     try:
-        property = Property.query.get_or_404(property_id)
+        property_obj = Property.query.get_or_404(property_id)
 
         # Delete all bookings for this property first
         Booking.query.filter_by(property_id=property_id).delete()
 
         # Delete the property
-        db.session.delete(property)
+        # If the property has an uploaded image stored in static/uploads, attempt to remove it
+        if property_obj.image_url and property_obj.image_url.startswith('uploads/'):
+            try:
+                file_path = os.path.join(app.root_path, 'static', property_obj.image_url)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception as rm_e:
+                print(f"Warning: could not remove image file: {rm_e}")
+
+        db.session.delete(property_obj)
         db.session.commit()
 
-        flash(f"Property {property.title} and all related bookings have been deleted", "success")
+        flash(f"Property {property_obj.title} and all related bookings have been deleted", "success")
         return redirect(url_for('admin', password='admin123'))
 
     except Exception as e:

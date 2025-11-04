@@ -6,29 +6,107 @@
     <title>Trio Airbnb - Vacation Rentals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* Make grid responsive on mobile */
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .property-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .property-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .property-details {
+            padding: 15px;
+        }
+
+        .property-type {
+            font-size: 0.9rem;
+            color: #FF5A5F;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-name {
+            margin: 10px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .property-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .property-location {
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .property-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #222;
+        }
+
+        @media (max-width: 768px) {
+            header nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-input label {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
-{% include 'includes/flash_messages.html' %}
-
-
+    {% include 'includes/flash_messages.html' %}
 
     <div id="homepage">
- <header>
-    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
-    <nav>
-        {% if session.user_id %}
-        <span class="user-welcome">Welcome, {{ session.user_name }}</span>
-        <a href="{{ url_for('profile') }}" class="btn" style="margin-right: 10px;">My Profile</a>
-        <a href="{{ url_for('logout') }}" class="btn">Logout</a>
-        {% else %}
-        <div class="nav-auth">
-            <a href="{{ url_for('login') }}" class="btn">Login</a>
-            <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
-        </div>
-        {% endif %}
-    </nav>
-</header>
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+            <nav>
+                {% if session.user_id %}
+                <span class="user-welcome">Welcome, {{ session.user_name }}</span>
+                <a href="{{ url_for('profile') }}" class="btn" style="margin-right: 10px;">My Profile</a>
+                <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+                {% else %}
+                <div class="nav-auth">
+                    <a href="{{ url_for('login') }}" class="btn">Login</a>
+                    <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
+                </div>
+                {% endif %}
+            </nav>
+        </header>
+
         <section class="hero">
             <div class="hero-content">
                 <h1>Home Away from Home</h1>
@@ -69,7 +147,7 @@
                 <div class="properties-grid">
                     {% for property in properties %}
                     <div class="property-card">
-                        <img src="{{ property.image_url }}" alt="{{ property.title }}" class="property-img">
+                        <img src="{{ url_for('static', filename='uploads/' + property.image) }}" alt="{{ property.title }}" class="property-img">
                         <div class="property-details">
                             <div class="property-type">{{ property.property_type }}</div>
                             <h3 class="property-name">{{ property.title }}</h3>
@@ -81,9 +159,9 @@
 
                             {% if session.user_id %}
                             <form class="booking-form" method="POST" action="{{ url_for('book_property') }}" style="margin-top: 15px;">
-    <input type="hidden" name="property_id" value="{{ property.id }}">
-    <input type="hidden" name="user_id" value="{{ session.get('user_id', '') }}">
-    <input type="hidden" name="guest_name" value="{{ session.get('user_name', '') }}">
+                                <input type="hidden" name="property_id" value="{{ property.id }}">
+                                <input type="hidden" name="user_id" value="{{ session.get('user_id', '') }}">
+                                <input type="hidden" name="guest_name" value="{{ session.get('user_name', '') }}">
                                 <div class="search-input">
                                     <label>Check-in</label>
                                     <input type="date" name="check_in" required>

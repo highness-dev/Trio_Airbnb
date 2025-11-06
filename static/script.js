@@ -29,3 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('login-password');
+
+togglePassword.addEventListener('click', () => {
+    const currentType = passwordInput.getAttribute('type');
+
+    if (currentType === 'password') {
+        passwordInput.setAttribute('type', 'text');
+        togglePassword.classList.remove('fa-eye');
+        togglePassword.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.setAttribute('type', 'password');
+        togglePassword.classList.remove('fa-eye-slash');
+        togglePassword.classList.add('fa-eye');
+    }
+});

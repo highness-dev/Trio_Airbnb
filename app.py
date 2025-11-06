@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, g
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, g, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -7,8 +7,8 @@ import os
 from dotenv import load_dotenv
 import logging
 import traceback
+import secrets
 
-# Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -45,9 +45,6 @@ from sqlalchemy import create_engine
 
 # Initialize db *once*
 db = SQLAlchemy()
-from flask_migrate import Migrate
-migrate = Migrate(app, db)
-
 
 try:
     # Try PostgreSQL first
@@ -72,6 +69,10 @@ except Exception as e:
 # Now finally bind db to app
 db.init_app(app)
 
+# Initialize migrations AFTER db.init_app
+from flask_migrate import Migrate
+migrate = Migrate(app, db)
+
 
 # User model
 class User(db.Model):
@@ -80,6 +81,8 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    reset_token = db.Column(db.String(255), nullable=True)
+
 
     # Relationship with bookings
     bookings = db.relationship('Booking', backref='user', lazy=True)
@@ -98,15 +101,21 @@ class Property(db.Model):
     price = db.Column(db.Float, nullable=False)
     property_type = db.Column(db.String(50), nullable=False)
     location = db.Column(db.String(100), nullable=False)
+    # store relative path to static folder, e.g. 'uploads/filename.jpg' or a full external URL
     image_url = db.Column(db.String(255), nullable=True)
     image_filename = db.Column(db.String(255), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     @property
     def image(self):
-        """Return local filename if exists, else fallback to URL"""
+        """
+        Return the stored image path.
+        - If image_filename is used (legacy), return 'uploads/<filename>'.
+        - Else return image_url (which may be 'uploads/...' or an absolute URL).
+        Templates should use: url_for('static', filename=property.image) when image is relative.
+        """
         if self.image_filename:
-            return self.image_filename
+            return f"uploads/{self.image_filename}"
         return self.image_url
 
     def __repr__(self):
@@ -123,6 +132,8 @@ class Booking(db.Model):
     guests = db.Column(db.Integer, nullable=False)
     guest_name = db.Column(db.String(100), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    property = db.relationship('Property', backref='booked_by', lazy=True)
 
     def __repr__(self):
         return f'<Booking {self.guest_name}>'
@@ -169,67 +180,6 @@ def init_db():
                 print("✅ All database tables already exist")
 
             # Insert sample properties if none exist
-            if not Property.query.first():
-                sample_properties = [
-                    Property(
-                        title="Sunset Beach Villa",
-                        description="Stunning beachfront property with panoramic ocean views and private access to the beach.",
-                        price=245,
-                        property_type="Beach House",
-                        location="Miami, FL",
-                        image_url="https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80"
-                    ),
-                    Property(
-                        title="Urban Loft Downtown",
-                        description="Stylish and modern loft in the heart of the city, walking distance to restaurants and attractions.",
-                        price=189,
-                        property_type="Modern Home",
-                        location="New York, NY",
-                        image_url="https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?ixlib=rb-4.0.3&auto=format&fit=crop&w=1748&q=80"
-                    ),
-                    Property(
-                        title="Alpine Forest Retreat",
-                        description="Cozy cabin nestled in the mountains with a fireplace and stunning views of the surrounding nature.",
-                        price=156,
-                        property_type="Mountain Cabin",
-                        location="Aspen, CO",
-                        image_url="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80"
-                    ),
-                    Property(
-                        title="Lakeside Cottage",
-                        description="Quaint cottage by the lake with a private dock and beautiful sunset views.",
-                        price=175,
-                        property_type="Cottage",
-                        location="Lake Tahoe, CA",
-                        image_url="https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1760&q=80"
-                    ),
-                    Property(
-                        title="City Center Apartment",
-                        description="Modern apartment in the heart of the city with amazing skyline views.",
-                        price=210,
-                        property_type="Apartment",
-                        location="Chicago, IL",
-                        image_url="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80"
-                    ),
-                    Property(
-                        title="Desert Oasis",
-                        description="Unique desert property with a private pool and stunning mountain views.",
-                        price=295,
-                        property_type="Luxury Home",
-                        location="Scottsdale, AZ",
-                        image_url="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=1674&q=80"
-                    )
-                ]
-
-                for prop in sample_properties:
-                    db.session.add(prop)
-
-                db.session.commit()
-                print("✅ Sample properties added to the database.")
-            else:
-                print("✅ Properties already exist in database")
-
-            return True
 
     except Exception as e:
         print(f"❌ Error initializing database: {e}")
@@ -325,6 +275,7 @@ def login():
             session['user_id'] = 'admin'
             session['user_name'] = 'Admin'
             flash("Welcome, Admin 👑", "success")
+            # Force admin to admin dashboard only
             return redirect(url_for('admin', password='admin123'))
 
         # ✅ Normal user login
@@ -370,6 +321,50 @@ def signup():
         return redirect(url_for('index'))
 
     return render_template('signup.html')
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            flash("No account found with that email.", "error")
+            return redirect(url_for('forgot_password'))
+
+        # create reset token
+        token = secrets.token_urlsafe(32)
+        user.reset_token = token
+        db.session.commit()
+
+        # temp "email" output (shows in console)
+        print("\n===== PASSWORD RESET LINK =====")
+        print(url_for('reset_password', token=token, _external=True))
+        print("================================\n")
+
+        flash("We sent you a password reset link. Check your email.", "success")
+        return redirect(url_for('login'))
+
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+
+    if not user:
+        return "Invalid or expired reset link."
+
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        user.password = generate_password_hash(new_password)
+        user.reset_token = None
+        db.session.commit()
+
+        flash("Password updated successfully. You can now log in.", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+
 
 
 @app.route('/search', methods=['POST'])
@@ -466,7 +461,7 @@ def check_session():
 @app.route('/admin')
 def admin():
     # Basic authentication for admin
-    if request.args.get('password') != 'admin123':
+    if request.args.get('password') != 'admin123' and session.get('user_id') != 'admin':
         return "Unauthorized", 401
 
     try:
@@ -502,7 +497,7 @@ def add_property():
         property_type = request.form.get('property_type', '').strip()
         location = request.form.get('location', '').strip()
         price_raw = request.form.get('price', '').strip()
-        description = request.form.get('description', '').strip() if request.form.get('description') else ''
+        description = request.form.get('description', '').strip()  # ✅ keep description from the form
 
         # Basic validation
         if not title or not property_type or not location or not price_raw:
@@ -515,28 +510,33 @@ def add_property():
             flash("Price must be a number.", "error")
             return redirect(url_for('admin', password='admin123'))
 
+        # ---- image handling (correctly inside the try block) ----
         image = request.files.get('image')
         db_image_path = None
 
         if image and image.filename != '':
             if allowed_file(image.filename):
+                # create a safe, unique filename
                 filename = secure_filename(f"{int(datetime.utcnow().timestamp())}_{image.filename}")
                 save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 image.save(save_path)
-                # Store a path relative to static folder for url_for usage
+                # Store a path relative to static folder (no leading slash)
                 db_image_path = f'uploads/{filename}'
             else:
                 flash("Invalid image type. Allowed: png, jpg, jpeg, gif, webp", "error")
                 return redirect(url_for('admin', password='admin123'))
+        else:
+            # no image uploaded — set a default image (ensure static/uploads/default.jpg exists)
+            db_image_path = 'uploads/default.jpg'
 
-        # Create and save property
+        # Create and save property with image + description
         new_property = Property(
             title=title,
-            description=description,
             property_type=property_type,
             location=location,
             price=price,
-            image_url=db_image_path
+            description=description,
+            image_url=db_image_path  # make sure your templates use url_for('static', filename=property.image_url) for local files
         )
 
         db.session.add(new_property)
@@ -614,13 +614,16 @@ def delete_property(property_id):
 
         # Delete the property
         # If the property has an uploaded image stored in static/uploads, attempt to remove it
-        if property_obj.image_url and property_obj.image_url.startswith('uploads/'):
-            try:
-                file_path = os.path.join(app.root_path, 'static', property_obj.image_url)
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            except Exception as rm_e:
-                print(f"Warning: could not remove image file: {rm_e}")
+        if property_obj.image_url:
+            # normalize possible variants
+            path = property_obj.image_url.lstrip('/')
+            if path.startswith('uploads/'):
+                file_path = os.path.join(app.root_path, 'static', path)
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                except Exception as rm_e:
+                    print(f"Warning: could not remove image file: {rm_e}")
 
         db.session.delete(property_obj)
         db.session.commit()
@@ -702,7 +705,17 @@ def test_connection():
         return "✅ Database connection successful!"
     except Exception as e:
         return f"❌ Database connection failed: {str(e)}"
+    
+    
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    """
+    Serve uploaded files from /static/uploads.
+    Use: in templates for local image: <img src="{{ url_for('uploaded_file', filename='cozy.jpg') }}">
+    or use url_for('static', filename=property.image_url) if property.image_url is 'uploads/<file>'
+    """
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

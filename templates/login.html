@@ -29,11 +29,18 @@
                     <label for="login-email">Email</label>
                     <input type="email" id="login-email" name="email" placeholder="Your email address" required>
                 </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" placeholder="Your password" required>
-                </div>
+              <div class="form-group password-group">
+    <label for="login-password">Password</label>
+    <div class="password-wrapper">
+        <input type="password" id="login-password" name="password" placeholder="Your password" required>
+        <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+    </div>
+</div>
+
                 <button type="submit" class="btn" style="width: 100%;">Login</button>
+                <div class="small-links">
+    <a href="{{ url_for('forgot_password') }}" class="forgot">Forgot password?</a>
+</div>
                 <div class="form-footer">
                     <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
                 </div>

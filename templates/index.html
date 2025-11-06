@@ -147,7 +147,8 @@
                 <div class="properties-grid">
                     {% for property in properties %}
                     <div class="property-card">
-                        <img src="{{ url_for('static', filename='uploads/' + property.image) }}" alt="{{ property.title }}" class="property-img">
+<img src="{{ property.image_url }}" alt="{{ property.title }}" width="100%" height="auto">
+<p>{{ property.description }}</p>
                         <div class="property-details">
                             <div class="property-type">{{ property.property_type }}</div>
                             <h3 class="property-name">{{ property.title }}</h3>

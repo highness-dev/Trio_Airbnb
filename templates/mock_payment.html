@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment - {{ property.title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f2f2; display: flex; justify-content: center; padding: 50px; }
+        .payment-container { background: #fff; padding: 30px; border-radius: 10px; width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        h2 { text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+        button { width: 100%; padding: 10px; background: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #218838; }
+        .methods { margin-top: 20px; }
+        .methods div { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <h2>Pay for {{ property.title }}</h2>
+        <form method="POST">
+            <input type="text" name="card_name" placeholder="Name on Card" required>
+            <input type="text" name="card_number" placeholder="Card Number" required>
+            <input type="text" name="expiry" placeholder="Expiry (MM/YY)" required>
+            <input type="text" name="cvv" placeholder="CVV" required>
+            <input type="hidden" name="amount" value="{{ property.price }}">
+            <button type="submit">Pay ${{ property.price }}</button>
+        </form>
+
+        <div class="methods">
+            <h4>Other Payment Methods:</h4>
+            <div>💳 Credit/Debit Card</div>
+            <div>🏦 Bank Transfer</div>
+            <div>📱 Mobile Money</div>
+            <div>💸 USSD (Simulated)</div>
+        </div>
+    </div>
+</body>
+</html>

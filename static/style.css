@@ -141,6 +141,203 @@ header {
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
+.main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: #222;
+    font-size: 1rem;
+    margin-right: 15px;
+}
+
+.main-nav a:hover {
+    color: #FF5A5F;
+}
+
+.left-links a {
+    font-weight: 500;
+}
+
+.right-links .btn {
+    margin-left: 10px;
+}
+
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+}
+
+/* Center nav */
+.center-nav {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    flex: 1;
+    margin-left: 200px;
+}
+
+.center-nav a {
+    text-decoration: none;
+    color: #222;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.center-nav a:hover {
+    color: #FF5A5F;
+}
+
+/* Right side buttons */
+.right-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.right-nav .btn {
+    margin-left: 10px;
+}
+
+/* Make sure the logo stays left */
+.logo {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #FF5A5F;
+    margin-right: 40px;
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Button styling */
+/* Button styling */
+.dropbtn {
+    background: none;
+    border: none;
+    text-decoration: none;
+    color: #222;
+    padding: 5px 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+
+/* Dropdown menu container (hidden by default) */
+.dropdown-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto); /* 2 items per row */
+    grid-template-rows: repeat(5, auto);    /* 5 rows */
+    gap: 10px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+    min-width: 220px; /* prevents squished layout */
+}
+
+.dropdown-grid a {
+    padding: 6px 10px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* space between icon + text */
+}
+
+.dropdown-grid a i {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+
+/* Dropdown items */
+
+
+
+.dropdown-content a {
+    color: #333;
+    padding: 10px 15px;
+    display: block;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.dropdown-content a:hover {
+    background: #f7f7f7;
+    color: #FF5A5F;
+}
+
+/* Hover behavior */
+.dropdown:hover .dropdown-grid {
+    display: grid;
+}
+
+.dropdown-grid a {
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+
+/* Optional: move menu down slightly */
+.dropdown-content {
+    margin-top: 8px;
+}
+.faq-page {
+    margin-top: 120px;   /* adjust until it clears the blur */
+}
+.privacy-page {
+    margin-top: 120px;   /* adjust until it clears the blur */
+}
+.terms-page {
+    margin-top: 120px;   /* adjust until it clears the blur */
+}
+.refund-page {
+    margin-top: 120px;   /* adjust until it clears the blur */
+}
+.contact-page {
+    padding-top: 180px;
+    display: block;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.contact-form button {
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
 /* Search Bar */
 .search-bar {
     background: white;

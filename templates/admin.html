@@ -188,7 +188,19 @@
     <form method="POST" action="{{ url_for('add_property') }}" enctype="multipart/form-data">
         <div style="display: grid; gap: 15px;">
             <input type="text" name="title" placeholder="Title" required>
-            <input type="text" name="property_type" placeholder="Type" required>
+    <select name="property_type" required>
+        <option value="" disabled selected>Select Type</option>
+        <option value="apartments">Apartments</option>
+        <option value="houses">Houses</option>
+        <option value="beach">Beach</option>
+        <option value="city">City</option>
+        <option value="suites">Suites</option>
+        <option value="cabins_and_nature_stays">Cabins & Nature Stays</option>
+        <option value="unique_homes">Unique Homes</option>
+        <option value="luxury_stays">Luxury Stays</option>
+        <option value="modern_and_tech_homes">Modern & Tech Homes</option>
+        <option value="shortlets">Shortlets</option>
+    </select>
             <input type="text" name="property-description" placeholder="Description" required>
             <input type="text" name="location" placeholder="Location" required>
             <input type="number" name="price" placeholder="Price ($)" required>

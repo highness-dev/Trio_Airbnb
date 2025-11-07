@@ -6,6 +6,8 @@
     <title>Trio Airbnb - Vacation Rentals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 
     <style>
         /* Make grid responsive on mobile */
@@ -91,21 +93,80 @@
     {% include 'includes/flash_messages.html' %}
 
     <div id="homepage">
-        <header>
+        <header class="main-header">
             <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
-            <nav>
-                {% if session.user_id %}
-                <span class="user-welcome">Welcome, {{ session.user_name }}</span>
-                <a href="{{ url_for('profile') }}" class="btn" style="margin-right: 10px;">My Profile</a>
-                <a href="{{ url_for('logout') }}" class="btn">Logout</a>
-                {% else %}
-                <div class="nav-auth">
-                    <a href="{{ url_for('login') }}" class="btn">Login</a>
-                    <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
-                </div>
-                {% endif %}
-            </nav>
-        </header>
+
+        <nav class="center-nav">
+    <a href="{{ url_for('about') }}">About</a>
+    <a href="{{ url_for('contact') }}">Contact</a>
+
+    <div class="dropdown">
+            <button class="dropbtn" type="button">Browse Listings ▾</button>
+
+
+        <div class="dropdown-grid">
+            <a href="{{ url_for('listings', category='apartments') }}">
+                <i class="fa-solid fa-building"></i> Apartments
+            </a>
+
+            <a href="{{ url_for('listings', category='houses') }}">
+                <i class="fa-solid fa-house"></i> Houses
+            </a>
+
+            <a href="{{ url_for('listings', category='beach') }}">
+                <i class="fa-solid fa-umbrella-beach"></i> Beach
+            </a>
+
+            <a href="{{ url_for('listings', category='city') }}">
+                <i class="fa-solid fa-city"></i> City
+            </a>
+
+            <a href="{{ url_for('listings', category='suites') }}">
+                <i class="fa-solid fa-door-open"></i> Suites
+            </a>
+
+            <a href="{{ url_for('listings', category='cabins_and_nature_stays') }}">
+                <i class="fa-solid fa-tree"></i> Cabins & Nature Stays
+            </a>
+
+            <a href="{{ url_for('listings', category='unique_homes') }}">
+                <i class="fa-solid fa-star"></i> Unique Homes
+            </a>
+
+            <a href="{{ url_for('listings', category='luxury_stays') }}">
+                <i class="fa-solid fa-gem"></i> Luxury Stays
+            </a>
+
+            <a href="{{ url_for('listings', category='modern_&_tech_homes') }}">
+                <i class="fa-solid fa-microchip"></i> Modern & Tech Homes
+            </a>
+
+            <a href="{{ url_for('listings', category='shortlets') }}">
+                <i class="fa-solid fa-clock"></i> Shortlets
+            </a>
+        </div>
+
+    </div>
+</nav>
+
+
+    <div class="right-nav">
+        {% if session.user_id %}
+            <span class="user-welcome">Welcome, {{ session.user_name }}</span>
+            {% if session.get('is_admin') %}
+    <a href="{{ url_for('admin') }}" class="btn">My Profile</a>
+{% else %}
+    <a href="{{ url_for('profile') }}" class="btn">My Profile</a>
+{% endif %}
+
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+            <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
+        {% endif %}
+    </div>
+</header>
+
 
         <section class="hero">
             <div class="hero-content">
@@ -194,21 +255,32 @@
             </div>
         </section>
 
-        <footer>
-            <div class="container">
-                <div class="footer-content">
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
-                    </div>
-                    <div class="copyright">
-                        &copy; 2025 Trio Airbnb. All rights reserved.
-                    </div>
-                </div>
+<footer>
+    <div class="container">
+        <div class="footer-content">
+
+            <div class="footer-links">
+                <a href="{{ url_for('terms') }}">Terms of Service</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('refund') }}">Refund Policy</a>
+                <a href="{{ url_for('faq') }}">FAQs</a>
             </div>
-        </footer>
+
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2025 Trio Airbnb. All rights reserved.
+            </div>
+
+        </div>
+    </div>
+</footer>
+
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

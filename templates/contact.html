@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Trio Airbnb</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    {% include 'includes/flash_messages.html' %}
+
+<header class="main-header">
+    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+
+    <nav class="center-nav">
+        <a href="{{ url_for('about') }}">About</a>
+          <div class="dropdown">
+            <a href="{{ url_for('listings') }}" class="dropbtn">Browse Listings ▾</a>
+
+        <div class="dropdown-grid">
+            <a href="{{ url_for('listings', category='apartments') }}">
+                <i class="fa-solid fa-building"></i> Apartments
+            </a>
+
+            <a href="{{ url_for('listings', category='houses') }}">
+                <i class="fa-solid fa-house"></i> Houses
+            </a>
+
+            <a href="{{ url_for('listings', category='beach') }}">
+                <i class="fa-solid fa-umbrella-beach"></i> Beach
+            </a>
+
+            <a href="{{ url_for('listings', category='city') }}">
+                <i class="fa-solid fa-city"></i> City
+            </a>
+
+            <a href="{{ url_for('listings', category='suites') }}">
+                <i class="fa-solid fa-door-open"></i> Suites
+            </a>
+
+            <a href="{{ url_for('listings', category='cabins_and_nature_stays') }}">
+                <i class="fa-solid fa-tree"></i> Cabins & Nature Stays
+            </a>
+
+            <a href="{{ url_for('listings', category='unique_homes') }}">
+                <i class="fa-solid fa-star"></i> Unique Homes
+            </a>
+
+            <a href="{{ url_for('listings', category='luxury_stays') }}">
+                <i class="fa-solid fa-gem"></i> Luxury Stays
+            </a>
+
+            <a href="{{ url_for('listings', category='modern_&_tech_homes') }}">
+                <i class="fa-solid fa-microchip"></i> Modern & Tech Homes
+            </a>
+
+            <a href="{{ url_for('listings', category='shortlets') }}">
+                <i class="fa-solid fa-clock"></i> Shortlets
+            </a>
+        </div>
+
+    </div>
+    </nav>
+
+    <div class="right-nav">
+        {% if session.user_id %}
+            <span class="user-welcome">Welcome, {{ session.user_name }}</span>
+            <a href="{{ url_for('profile') }}" class="btn">My Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+            <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
+        {% endif %}
+    </div>
+</header>
+
+<!-- Page Header -->
+<section style="margin-top: 140px; text-align: center;">
+    <h1>Contact Us</h1>
+    <p>We’d love to hear from you anytime.</p>
+</section>
+
+<!-- Main Contact Section -->
+<section style="padding: 40px 20px; max-width: 600px; margin: 0 auto;">
+
+    <form 
+        method="POST" 
+        action="{{ url_for('contact') }}" 
+        style="display: flex; flex-direction: column; gap: 15px;"
+    >
+
+        <label>Name</label>
+        <input type="text" name="name" required style="padding: 12px;">
+
+        <label>Email</label>
+        <input type="email" name="email" required style="padding: 12px;">
+
+        <label>Message</label>
+        <textarea name="message" required style="padding: 12px; height: 150px;"></textarea>
+
+        <button class="btn" style="margin-top: 10px;">Send Message</button>
+    </form>
+
+    <div style="margin-top: 40px; text-align: center;">
+        <h3>Other Ways to Reach Us</h3>
+
+        <p style="margin: 10px 0;">
+            <i class="fas fa-envelope"></i> support@trioairbnb.com
+        </p>
+
+        <p style="margin: 10px 0;">
+            <i class="fas fa-phone"></i> +234 906 625 2189
+        </p>
+
+        <p style="margin: 10px 0;">
+            <i class="fas fa-map-marker-alt"></i> Lagos, Nigeria
+        </p>
+    </div>
+
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+
+            <div class="footer-links">
+                <a href="{{ url_for('terms') }}">Terms of Service</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('refund') }}">Refund Policy</a>
+                <a href="{{ url_for('faq') }}">FAQs</a>
+            </div>
+
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2025 Trio Airbnb. All rights reserved.
+            </div>
+
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs - Trio Airbnb</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+<header class="main-header">
+    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+</header>
+
+<section style="margin-top: 140px; text-align: center;">
+    <h1>Frequently Asked Questions</h1>
+    <p>Your most common questions, answered simply.</p>
+</section>
+
+<section style="padding: 40px 20px; max-width: 700px; margin: 0 auto; line-height: 1.7;">
+
+    <h2 style="margin-top: 30px;">How do I book a property?</h2>
+    <p>Create an account, browse properties, and click “Book Now.”</p>
+
+    <h2 style="margin-top: 30px;">How do payments work?</h2>
+    <p>All payments are handled securely through our payment provider.</p>
+
+    <h2 style="margin-top: 30px;">What if a host cancels?</h2>
+    <p>You’ll get a full refund and assistance in finding a new place.</p>
+
+    <h2 style="margin-top: 30px;">How do I list my property?</h2>
+    <p>Open your profile and select “Add Listing.”</p>
+
+    <h2 style="margin-top: 30px;">How do I contact support?</h2>
+    <p>Use the Contact page to send us a direct message.</p>
+
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+
+            <div class="footer-links">
+                <a href="{{ url_for('terms') }}">Terms of Service</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('refund') }}">Refund Policy</a>
+                <a href="{{ url_for('faq') }}">FAQs</a>
+            </div>
+
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2025 Trio Airbnb. All rights reserved.
+            </div>
+
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

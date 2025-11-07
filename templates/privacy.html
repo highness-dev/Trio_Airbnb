@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Trio Airbnb</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+<header>
+    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+</header>
+
+<div class="inner-page" style="max-width: 900px; margin: 120px auto 60px; padding: 20px; text-align: center;">
+    
+    <h1 style="font-size: 38px;">Privacy Policy</h1>
+    <p style="margin-top: 10px; color: #666;"><strong>Last Updated:</strong> 2025</p>
+
+    <div style="text-align: left; margin-top: 40px; line-height: 1.7;">
+
+        <h2>1. Information We Collect</h2>
+        <ul>
+            <li>Name and email address</li>
+            <li>Booking details</li>
+            <li>Device information</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use your data to manage accounts, process bookings, and improve the platform.</p>
+
+        <h2>3. Cookies</h2>
+        <p>We use cookies to store preferences and improve user experience.</p>
+
+        <h2>4. Data Sharing</h2>
+        <p>We do not sell your data. We only share information with payment processors and hosts when required.</p>
+
+        <h2>5. Data Protection</h2>
+        <p>Your information is encrypted and stored securely.</p>
+
+    </div>
+
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+
+            <div class="footer-links">
+                <a href="{{ url_for('terms') }}">Terms of Service</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('refund') }}">Refund Policy</a>
+                <a href="{{ url_for('faq') }}">FAQs</a>
+            </div>
+
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2025 Trio Airbnb. All rights reserved.
+            </div>
+
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

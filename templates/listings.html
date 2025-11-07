@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Properties - Trio Airbnb</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    {% include 'includes/flash_messages.html' %}
+
+<header class="main-header">
+    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+
+    <nav class="center-nav">
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="{{ url_for('contact') }}">Contact</a>
+    </nav>
+
+    <div class="right-nav">
+        {% if session.user_id %}
+            <span class="user-welcome">Welcome, {{ session.user_name }}</span>
+            <a href="{{ url_for('profile') }}" class="btn">My Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+            <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
+        {% endif %}
+    </div>
+</header>
+
+<section class="page-header">
+    <h1 style="text-transform: capitalize;">
+        {% if category %}
+            {{ category.replace('_', ' ') }}
+        {% else %}
+            Browse All Listings
+        {% endif %}
+    </h1>
+
+    <p>
+        {% if category %}
+            Showing places in {{ category.replace('_', ' ') }}.
+        {% else %}
+            Find your next stay from our available homes.
+        {% endif %}
+    </p>
+</section>
+
+
+    <section class="properties-list">
+        <div class="properties-grid">
+            {% for property in properties %}
+            <div class="property-card">
+                <img src="{{ property.image_url }}" alt="{{ property.title }}" class="property-img">
+
+                <div class="property-details">
+                    <div class="property-type">{{ property.property_type }}</div>
+                    <h3 class="property-name">{{ property.title }}</h3>
+                    <p class="property-location">
+                        <i class="fas fa-map-marker-alt"></i> {{ property.location }}
+                    </p>
+                    <div class="property-price">${{ property.price }} / night</div>
+
+                    <a href="{{ url_for('view_property', property_id=property.id) }}" class="btn" style="margin-top: 10px;">
+                        View Details
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Trio Airbnb. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>

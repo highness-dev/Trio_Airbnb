@@ -241,6 +241,50 @@ def index():
         print(f"❌ {error_msg}")
         return render_template('error.html', error_message=error_msg)
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico'
+    )
+
+    
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+@app.route("/listings")
+def listings():
+    category = request.args.get("category")  # get ?category=...
+    
+    if category:
+        properties = Property.query.filter_by(property_type=category).all()
+    else:
+        properties = Property.query.all()
+
+    return render_template("listings.html", properties=properties, category=category)
+
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/refund')
+def refund():
+    return render_template('refund.html')
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
+
 
 @app.route('/profile')
 def profile():
@@ -248,15 +292,21 @@ def profile():
         flash("Please log in to view your profile", "error")
         return redirect(url_for('login'))
 
+    # If admin clicks 'My Profile', redirect them to admin dashboard
+    if session.get('user_id') == 'admin':
+        return redirect(url_for('admin', password='admin123'))
+
     try:
         user = User.query.get(session['user_id'])
         bookings = Booking.query.filter_by(user_id=session['user_id']).order_by(Booking.date_created.desc()).all()
 
         return render_template('profile.html', user=user, bookings=bookings, datetime=datetime)
+
     except Exception as e:
         print(f"Error loading profile: {e}")
         flash("Error loading profile. Please try again.", "error")
         return redirect(url_for('index'))
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -274,6 +324,7 @@ def login():
         if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
             session['user_id'] = 'admin'
             session['user_name'] = 'Admin'
+            session['is_admin'] = True      # ✅ add this
             flash("Welcome, Admin 👑", "success")
             # Force admin to admin dashboard only
             return redirect(url_for('admin', password='admin123'))
@@ -282,6 +333,7 @@ def login():
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             session['user_name'] = user.name
+            session['is_admin'] = False
             session.permanent = True
 
             flash(f"Welcome back, {user.name}!", "success")

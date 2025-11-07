@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Policy - Trio Airbnb</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+<header>
+    <a href="{{ url_for('index') }}" class="logo">Trio Airbnb</a>
+</header>
+
+<div class="inner-page" style="max-width: 900px; margin: 120px auto 60px; padding: 20px; text-align: center;">
+    
+    <h1 style="font-size: 38px;">Refund Policy</h1>
+    <p style="margin-top: 10px; color: #666;"><strong>Last Updated:</strong> November 2025</p>
+
+    <div style="text-align: left; margin-top: 40px; line-height: 1.7;">
+
+        <h2>1. Guest Cancellations</h2>
+        <p>Refunds depend on the host’s cancellation policy.</p>
+
+        <h2>2. Host Cancellations</h2>
+        <p>If a host cancels, you will receive a full refund.</p>
+
+        <h2>3. No-Shows</h2>
+        <p>Guests who do not show up without canceling are not eligible for refunds.</p>
+
+        <h2>4. Processing Time</h2>
+        <p>Refunds typically take 3–10 business days depending on your bank or payment provider.</p>
+
+    </div>
+
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+
+            <div class="footer-links">
+                <a href="{{ url_for('terms') }}">Terms of Service</a>
+                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+                <a href="{{ url_for('refund') }}">Refund Policy</a>
+                <a href="{{ url_for('faq') }}">FAQs</a>
+            </div>
+
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2025 Trio Airbnb. All rights reserved.
+            </div>
+
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
